@@ -1,0 +1,24 @@
+{{- range .Values.extraVolumes }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    field.cattle.io/creatorId: user-sw4mg
+    pv.kubernetes.io/bind-completed: "yes"
+  creationTimestamp: 2019-04-02T17:12:07Z
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+    cattle.io/creator: norman
+  name: {{ .baseName }}-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  dataSource: null
+  resources:
+    requests:
+      storage: 10Mi
+  storageClassName: ""
+  volumeName: {{ .baseName }}-pv
+---
+{{- end}}

@@ -1,0 +1,117 @@
+# Default values for vertx-hello.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+# Each of existingVolumeClaims is a volume for which both Persistent Volume and a Persistent Volume
+# Claim for that volume already exist in Kubernetes.
+# The properties are:
+#   name:      An arbitrary name as which the volume will appear in the pod
+#   claimName: The name of the existing PVC
+#   mountAt:   The path in the container OS at which the volume will be mounted
+existingVolumeClaims:
+#- name: volfromtroy
+#  claimName: orderer-pvc
+#  mountAt: /mnt
+
+# Each of existingVolumes is a volume for which a Persistent Volume already exists in Kubernetes.
+# You can only use this to reclaim a PV that has been released from a PVC by first deleting the uid of the PVC from the PV:
+#   kubectl patch pv <PV name> -p '{"spec":{"claimRef":{"uid":""}}}'
+# After that you can claim it with a PVC with the same name, storage class, and capacity
+# The properties are:
+#   name:             An arbitrary name of the clain and as which the volume will appear in the pod
+#   volumeName:       The name of the Persistent Volume that already exists
+#   storageClassName: The name of the storage class of volumeName
+#   capacity:         Capacity of volumeName
+#   mountAt:          The path in the container OS at which the volume will be mounted
+existingVolumes:
+#- name: billexchange-pv
+#  volumeName: pv-orderer
+#  storageClassName: ""
+#  capacity: 10Mi
+#  mountAt: /mnt
+
+# Each of extraVolumes is a volume to be mounted from an NFS share exported by an NFS server
+# The properties are:
+#   baseName:   An arbitrary name used to form the name of the PersistentVolume (<baseName>-pv) and the 
+#               PersistentVolumeClaim (<baseName>-pvc).
+#   mountAt:    The path in the container OS at which the volume will be mounted
+#   serverPath: The share's export path on the NFS server
+#   server:     The IP address or name of the NFS server
+#extraVolumes:
+#- baseName: test
+#  mountAt: /mnt
+#  serverPath: /opt/medilink_share
+#  server: ustr-uvm-11630.na.uis.unisys.com
+
+#- baseName: rex-1b
+#  mountAt: /mnt
+#  serverPath: /export/proj2/sandbox-scvol-pvc-pvc-b2e3c885-5ee3-11e9-9332-005056b171b1
+#  server: 10.62.146.53
+
+#  -baseName: rex-1d
+#  mountAt: /mnt
+#  serverPath: /nfs/singularity-rex-1
+#  server: us-prod-nfs-2.na.uis.unisys.com 
+
+# Each of storageClassVolumes is a volume to be created via the STorageClass
+# storageClassVolumes:
+# - baseName: sctest
+#  capacity: 1Gi
+#  serverPath: /nfs/singularity-rex-1
+#  server: us-prod-nfs-2.na.uis.unisys.com
+#  storageClassName: nfs-client
+#  mountAt: /mnt
+
+nfs:
+  mountOptions: "rw" 
+
+image:
+  repository: ustr-harbor-1.na.uis.unisys.com/singularity/spring-hello
+  version: 0.1.3-0.1
+  pullPolicy: Always
+
+nameOverride: ""
+fullnameOverride: ""
+
+service:
+  type: NodePort
+  port: 8080
+
+ingress:
+  enabled: false
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  paths: []
+  hosts:
+    - chart-example.local
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+
+envVars:
+  - name: "ENVTEST1"
+    value: "Value from values.yaml"
+  - name: "ENVTEST2"
+    value: "Another value 2 from values.yaml"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

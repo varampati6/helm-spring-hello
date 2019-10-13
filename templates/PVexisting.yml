@@ -1,0 +1,20 @@
+{{- range .Values.existingVolumes }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+  name: {{ .name }} 
+spec:
+  accessModes:
+  - ReadWriteOnce
+  volumeMode: Filesystem
+  storageClassName: {{ .storageClassName }}
+  volumeName: {{ .volumeName }}
+  resources:
+    requests:
+      storage: {{ .capacity }}
+---
+{{- end }}

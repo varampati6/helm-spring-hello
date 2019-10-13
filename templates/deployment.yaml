@@ -1,0 +1,144 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "spring-hello.fullname" . }}
+  labels:
+    app.kubernetes.io/name: {{ include "spring-hello.name" . }}
+    helm.sh/chart: {{ include "spring-hello.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "spring-hello.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "spring-hello.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{ toYaml .Values.resources | nindent 12 }}
+
+          volumeMounts:
+          # Mount the volume claims that already existed in Kubernetes
+          {{- range .Values.existingVolumeClaims }}
+            - name: {{ .name }}
+              claimName: {{ .claimName }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+
+          # Mount the volumes that already existed in Kubernetes
+          {{- range .Values.existingVolumes }}
+            - name: {{ .name }}
+              claimName: {{ .name }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+
+          # Mount the volumes that were already on the server, but not in Kubernetes
+          {{- range .Values.extraVolumes }}
+            - name: {{ .baseName }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+
+          # Mount the volumes that were dynamically provisioned
+          {{- range .Values.dynamicVolumes }}
+            - name: {{ .baseName }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+
+          # Mount the secret volumes
+          {{- range .Values.secretVolumes }}
+            - name: {{ .volumeName }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+          
+          # Mount the storage class volumes
+          {{- range .Values.storageClassVolumes }}
+            - name: {{ .baseName }}
+              mountPath: {{ .mountAt }}
+          {{- end }}
+          
+          env:
+          - name: ENVVAR1
+            value: "Value from deployment.yaml"
+          - name: ENVVAR2
+            value: "Another Value from deployment.yaml"
+        {{- range .Values.envVars }}
+          - name: "{{ .name }}"
+            value: "{{ .value }}"
+        {{- end }}
+
+      volumes:
+      # Include claims already in Kubernetes
+      {{- range .Values.existingVolumeClaims }}
+        - name: {{ .name }}
+          persistentVolumeClaim: 
+            claimName: {{ .claimName }}
+      {{- end }}
+
+      # Include volumes already in Kubernetes
+      # Claims were created in PVexisting.yml
+      {{- range .Values.existingVolumes }}
+        - name: {{ .name }}
+          persistentVolumeClaim: 
+
+            claimName: {{ .name }}
+      {{- end }}
+
+      # Include volumes that were already on the server, but not in Kubernetes
+      {{- range .Values.extraVolumes }}
+        - name: {{ .baseName }}
+          persistentVolumeClaim:
+            claimName: {{ .baseName }}-pvc
+      {{- end }}
+
+      # Include the dynamically provisioned volumes
+      {{- range .Values.dynamicVolumes }}
+        - name: {{ .baseName }}
+          persistentVolumeClaim:
+            claimName: {{ .baseName }}-pvc
+      {{ end }}
+      
+      # Include volumes from secrets
+      {{- range .Values.secretVolumes }}
+        - name: {{ .volumeName }}
+          secret:
+            secretName: {{ .secretName }}
+      {{ end }}
+
+      # Include volumes from storage class
+      {{- range .Values.storageClassVolumes }}
+        - name: {{ .baseName }}
+          persistentVolumeClaim:
+            claimName: {{ .baseName }}
+      {{ end }}
+
+      imagePullSecrets:
+        - name: harbor-1
+        - name: harbor1
+      nodeSelector:
+        {{ toYaml .Values.nodeSelector | nindent 8 }}
+      affinity:
+        {{ toYaml .Values.affinity | nindent 8 }}
+      tolerations:
+        {{ toYaml .Values.tolerations | nindent 8 }}
+        

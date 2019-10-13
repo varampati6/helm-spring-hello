@@ -1,0 +1,20 @@
+{{ range .Values.dynamicVolumes -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    volume.beta.kubernetes.io/storage-class: "{{ .storageClass }}"
+  creationTimestamp: 2019-04-02T17:12:07Z
+  finalizers:
+  - kubernetes.io/pvc-protection
+  labels:
+    cattle.io/creator: norman
+  name: {{ .baseName }}-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Mi
+{{- end }}
+---

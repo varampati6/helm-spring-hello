@@ -1,0 +1,25 @@
+{{- range .Values.extraVolumes }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  annotations:
+    field.cattle.io/creatorId: user-sw4mg
+    pv.kubernetes.io/bound-by-controller: "yes"
+  finalizers:
+  - kubernetes.io/pv-protection
+  labels:
+    cattle.io/creator: norman
+  name: {{ .baseName }}-pv
+spec:
+  accessModes:
+  - ReadWriteOnce
+  - ReadOnlyMany
+  - ReadWriteMany
+  capacity:
+    storage: 10Mi
+  nfs:
+    path: {{ .serverPath }}
+    server: {{ .server }}
+  persistentVolumeReclaimPolicy: Retain
+---
+{{- end }}
